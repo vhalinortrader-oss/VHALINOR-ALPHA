@@ -1,0 +1,415 @@
+# Gerenciar seus tokens de acesso pessoal
+
+Você pode usar um personal access token no lugar de uma senha ao autenticar GitHub na linha de comando ou com a API.
+
+> \[!WARNING]
+> Trate seus tokens de acesso como se fossem senhas. Para obter mais informações, consulte [Manter seus personal access tokendados seguros](#keeping-your-personal-access-tokens-secure).
+
+## Sobre personal access tokens
+
+Personal access tokens são uma alternativa ao uso de senhas para autenticação no GitHub ao usar a [GitHub API](/pt/rest/overview/authenticating-to-the-rest-api) ou a [linha de comando](#using-a-personal-access-token-on-the-command-line).
+
+Personal access tokens são destinados a acessar GitHub recursos em nome de si mesmo. Para acessar recursos em nome de uma organização ou para integrações de longa duração, você deve usar uma GitHub App. Para saber mais, confira [Sobre a criação de aplicativos GitHub](/pt/apps/creating-github-apps/setting-up-a-github-app/about-creating-github-apps).
+
+Um token tem os mesmos recursos para acessar recursos e executar ações nesses recursos que o proprietário do token e é ainda mais limitado por quaisquer escopos ou permissões concedidos ao token. Um token não pode conceder recursos de acesso adicionais a um usuário. Por exemplo, um personal access token pode ser configurado com um `admin:org` escopo, mas se o proprietário do token não for um proprietário da organização, o token não dará acesso administrativo à organização.
+
+### Tipos de personal access tokens
+
+GitHub atualmente dá suporte a dois tipos de personal access tokens: fine-grained personal access tokens e personal access tokens (classic).
+GitHub recomenda que você use fine-grained personal access token em vez de personal access tokens (classic) sempre que possível.
+
+> \[!NOTE]
+> Fine-grained personal access tokens, embora mais seguro e controlável, não pode realizar todas as tarefas que um personal access token (classic) pode. Consulte a seção sobre [Fine-grained personal access tokens as limitações](#fine-grained-personal-access-tokens-limitations) abaixo para saber mais.
+
+Ambos fine-grained personal access tokene personal access tokens (classic) estão vinculados ao usuário que os gerou e ficarão inativos se o usuário perder o acesso ao recurso.
+
+Os proprietários da organização podem definir uma política para restringir o acesso de personal access tokens (classic) à sua organização. Para saber mais, confira [Como configurar uma política de token de acesso pessoal para a organização](/pt/organizations/managing-programmatic-access-to-your-organization/setting-a-personal-access-token-policy-for-your-organization#restricting-access-by-personal-access-tokens).
+
+#### Fine-grained personal access tokens
+
+Fine-grained personal access tokens têm várias vantagens de segurança sobre personal access tokens (classic), mas também têm limitações que podem fazer com que você não consiga usá-las em todos os cenários. Esses limites, e nossos planos para corrigi-los, podem ser encontrados na [seção abaixo](#fine-grained-personal-access-tokens-limitations).
+
+Se você puder usar um fine-grained personal access token para seu cenário, você se beneficiará dessas melhorias:
+
+* Cada token é limitado a acessar recursos pertencentes a um usuário ou uma organização.
+* Cada token pode ser ainda mais limitado a acessar apenas repositórios específicos desse usuário ou organização.
+* Cada token recebe permissões específicas e granulares, que oferecem mais controle do que os escopos concedidos a personal access tokens (classic).
+* Os proprietários da organização podem exigir aprovação para quaisquer fine-grained personal access tokens que possam acessar recursos na organização.
+
+##### Fine-grained personal access tokens Limitações
+
+Fine-grained personal access tokens não dão suporte a todos os recursos de personal access tokens (classic). Essas lacunas de recursos não são permanentes, GitHub está trabalhando para fechá-las. Examine [nosso roteiro público](https://github.com/github/roadmap) para obter mais detalhes sobre quando esses cenários terão suporte.
+
+As principais lacunas em fine-grained personal access tokens são:
+
+* Usar fine-grained personal access token para contribuir com repositórios públicos em que o usuário não é membro.
+
+* Usar fine-grained personal access token para contribuir com repositórios em que o usuário é um colaborador externo ou de repositório.
+
+* Usar fine-grained personal access token para acessar várias organizações ao mesmo tempo.
+
+* Usar fine-grained personal access token para acessar pacotes.
+
+* Usar fine-grained personal access token para chamar a API de Verificações.
+
+* Usar fine-grained personal access token para acessar projetos de propriedade de uma conta de usuário.
+
+Todas essas lacunas serão resolvidas ao longo do tempo, à medida que GitHub continuar investindo em padrões de acesso mais seguros.
+
+#### Personal access tokens (classic)
+
+Personal access tokens (classic) são menos seguros. Entretanto, alguns recursos só funcionam com personal access tokens (classic):
+
+* Somente personal access tokens (classic) têm acesso de gravação para repositórios públicos que não pertencem a você ou a uma organização da qual você não é membro.
+* Os colaboradores externos só podem usar personal access tokens (classic) para acessar repositórios da organização nos quais são colaboradores.
+* Alguns Pontos de Extremidade de API REST só estão disponíveis com um personal access tokens (classic). Para determinar se um ponto de extremidade também oferece suporte a fine-grained personal access tokens, confira a documentação correspondente ou confira [Pontos de extremidade disponíveis para tokens de acesso pessoal refinados](/pt/rest/overview/endpoints-available-for-fine-grained-personal-access-tokens).
+
+Se você optar por usar um personal access token (classic), tenha em mente que ele concederá acesso a todos os repositórios dentro das organizações às quais você tem acesso, bem como a todos os repositórios pessoais em sua conta pessoal.
+
+Como precaução de segurança, o GitHub remove automaticamente os personal access token que não são usados há um ano. Para fornecer segurança adicional, recomendamos fortemente adicionar uma validade aos personal access tokens.
+
+### Mantendo seus personal access tokens seguros
+
+Personal access tokens são como senhas e compartilham os mesmos riscos de segurança inerentes. Antes de criar um novo personal access token, considere se há um método mais seguro de autenticação disponível para você:
+
+* Para acessar GitHub a partir da linha de comando, você pode usar [GitHub CLI](/pt/github-cli/github-cli/about-github-cli) ou [o Git Credential Manager](https://github.com/GitCredentialManager/git-credential-manager/blob/main/README.md) em vez de criar um personal access token.
+* Ao usar um personal access token em um fluxo de trabalho GitHub Actions, considere se você pode usar a funcionalidade interna `GITHUB_TOKEN` em vez disso. Para saber mais, confira [Usar GITHUB\_TOKEN para autenticação em fluxos de trabalho](/pt/actions/security-guides/automatic-token-authentication).
+
+Se essas opções não forem possíveis e você precisar criar um personal access token, considere usar outro serviço da CLI para armazenar seu token com segurança.
+
+Ao usar um personal access token em um script, você pode armazenar seu token como um segredo e executar seu script através do GitHub Actions. Para obter mais informações, consulte [Usar segredos em ações do GitHub](/pt/actions/security-guides/encrypted-secrets). Você também pode armazenar seu token como um Codespaces segredo e executar seu script em Codespaces. Para obter mais informações, consulte [Gerenciando seus segredos específicos da conta no GitHub Codespaces](/pt/codespaces/managing-your-codespaces/managing-encrypted-secrets-for-your-codespaces).
+
+Para obter mais informações sobre as práticas recomendadas, consulte [Manter suas credenciais de API seguras](/pt/rest/overview/keeping-your-api-credentials-secure).
+
+## Criar um fine-grained personal access token
+
+> \[!NOTE]
+> Há um limite de 50 fine-grained personal access tokens que você pode criar. Se você precisar de mais tokens ou estiver criando automações, considere usar um GitHub App para melhorar a escalabilidade e o gerenciamento. Para saber mais, confira [Decidir quando criar um aplicativo GitHub](/pt/apps/creating-github-apps/about-creating-github-apps/deciding-when-to-build-a-github-app#choosing-between-a-github-app-or-a-personal-access-token).
+
+1. [Verifique seu endereço de email](/pt/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-email-preferences/verifying-your-email-address), se ele ainda não foi verificado.
+
+2. No canto superior direito de qualquer página do GitHub, clique em sua imagem de perfil e, em seguida, clique em **<svg version="1.1" width="16" height="16" viewBox="0 0 16 16" class="octicon octicon-gear" aria-label="gear" role="img"><path d="M8 0a8.2 8.2 0 0 1 .701.031C9.444.095 9.99.645 10.16 1.29l.288 1.107c.018.066.079.158.212.224.231.114.454.243.668.386.123.082.233.09.299.071l1.103-.303c.644-.176 1.392.021 1.82.63.27.385.506.792.704 1.218.315.675.111 1.422-.364 1.891l-.814.806c-.049.048-.098.147-.088.294.016.257.016.515 0 .772-.01.147.038.246.088.294l.814.806c.475.469.679 1.216.364 1.891a7.977 7.977 0 0 1-.704 1.217c-.428.61-1.176.807-1.82.63l-1.102-.302c-.067-.019-.177-.011-.3.071a5.909 5.909 0 0 1-.668.386c-.133.066-.194.158-.211.224l-.29 1.106c-.168.646-.715 1.196-1.458 1.26a8.006 8.006 0 0 1-1.402 0c-.743-.064-1.289-.614-1.458-1.26l-.289-1.106c-.018-.066-.079-.158-.212-.224a5.738 5.738 0 0 1-.668-.386c-.123-.082-.233-.09-.299-.071l-1.103.303c-.644.176-1.392-.021-1.82-.63a8.12 8.12 0 0 1-.704-1.218c-.315-.675-.111-1.422.363-1.891l.815-.806c.05-.048.098-.147.088-.294a6.214 6.214 0 0 1 0-.772c.01-.147-.038-.246-.088-.294l-.815-.806C.635 6.045.431 5.298.746 4.623a7.92 7.92 0 0 1 .704-1.217c.428-.61 1.176-.807 1.82-.63l1.102.302c.067.019.177.011.3-.071.214-.143.437-.272.668-.386.133-.066.194-.158.211-.224l.29-1.106C6.009.645 6.556.095 7.299.03 7.53.01 7.764 0 8 0Zm-.571 1.525c-.036.003-.108.036-.137.146l-.289 1.105c-.147.561-.549.967-.998 1.189-.173.086-.34.183-.5.29-.417.278-.97.423-1.529.27l-1.103-.303c-.109-.03-.175.016-.195.045-.22.312-.412.644-.573.99-.014.031-.021.11.059.19l.815.806c.411.406.562.957.53 1.456a4.709 4.709 0 0 0 0 .582c.032.499-.119 1.05-.53 1.456l-.815.806c-.081.08-.073.159-.059.19.162.346.353.677.573.989.02.03.085.076.195.046l1.102-.303c.56-.153 1.113-.008 1.53.27.161.107.328.204.501.29.447.222.85.629.997 1.189l.289 1.105c.029.109.101.143.137.146a6.6 6.6 0 0 0 1.142 0c.036-.003.108-.036.137-.146l.289-1.105c.147-.561.549-.967.998-1.189.173-.086.34-.183.5-.29.417-.278.97-.423 1.529-.27l1.103.303c.109.029.175-.016.195-.045.22-.313.411-.644.573-.99.014-.031.021-.11-.059-.19l-.815-.806c-.411-.406-.562-.957-.53-1.456a4.709 4.709 0 0 0 0-.582c-.032-.499.119-1.05.53-1.456l.815-.806c.081-.08.073-.159.059-.19a6.464 6.464 0 0 0-.573-.989c-.02-.03-.085-.076-.195-.046l-1.102.303c-.56.153-1.113.008-1.53-.27a4.44 4.44 0 0 0-.501-.29c-.447-.222-.85-.629-.997-1.189l-.289-1.105c-.029-.11-.101-.143-.137-.146a6.6 6.6 0 0 0-1.142 0ZM11 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM9.5 8a1.5 1.5 0 1 0-3.001.001A1.5 1.5 0 0 0 9.5 8Z"></path></svg> Configurações**.
+
+3. Na barra lateral esquerda, clique em **<svg version="1.1" width="16" height="16" viewBox="0 0 16 16" class="octicon octicon-code" aria-label="code" role="img"><path d="m11.28 3.22 4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734L13.94 8l-3.72-3.72a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215Zm-6.56 0a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042L2.06 8l3.72 3.72a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L.47 8.53a.75.75 0 0 1 0-1.06Z"></path></svg> Developer settings**.
+
+4. Na barra lateral esquerda, em **<svg version="1.1" width="16" height="16" viewBox="0 0 16 16" class="octicon octicon-key" aria-label="key" role="img"><path d="M10.5 0a5.499 5.499 0 1 1-1.288 10.848l-.932.932a.749.749 0 0 1-.53.22H7v.75a.749.749 0 0 1-.22.53l-.5.5a.749.749 0 0 1-.53.22H5v.75a.749.749 0 0 1-.22.53l-.5.5a.749.749 0 0 1-.53.22h-2A1.75 1.75 0 0 1 0 14.25v-2c0-.199.079-.389.22-.53l4.932-4.932A5.5 5.5 0 0 1 10.5 0Zm-4 5.5c-.001.431.069.86.205 1.269a.75.75 0 0 1-.181.768L1.5 12.56v1.69c0 .138.112.25.25.25h1.69l.06-.06v-1.19a.75.75 0 0 1 .75-.75h1.19l.06-.06v-1.19a.75.75 0 0 1 .75-.75h1.19l1.023-1.025a.75.75 0 0 1 .768-.18A4 4 0 1 0 6.5 5.5ZM11 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Personal access tokens**, clique em **tokens granulares**.
+
+5. Clique em **Gerar novo token**.
+
+6. Em **Nome do token**, insira um nome para ele.
+
+7. Em **Validade**, selecione uma validade para o token. Tempos de vida infinitos são permitidos, mas podem ser bloqueados por uma política de tempo de vida máximo definida pelo proprietário da sua organização ou empresa. Para obter mais informações, veja [a aplicação de uma política de tempo de vida máxima para personal access tokens](/pt/organizations/managing-programmatic-access-to-your-organization/setting-a-personal-access-token-policy-for-your-organization#enforcing-a-maximum-lifetime-policy-for-personal-access-tokens).
+
+8. Opcionalmente, em **Descrição**, adicione uma observação para descrever a finalidade do token.
+
+9. Em **Proprietário do recurso**, selecione um proprietário de recurso. O token só poderá acessar recursos pertencentes ao proprietário do recurso selecionado. As organizações das quais você é membro não serão exibidas se a organização tiver bloqueado o uso de fine-grained personal access tokens. Para obter mais informações, consulte [Como configurar uma política de token de acesso pessoal para a organização](/pt/organizations/managing-programmatic-access-to-your-organization/setting-a-personal-access-token-policy-for-your-organization).
+
+10. Opcionalmente, se o proprietário do recurso for uma organização que requer aprovação para fine-grained personal access tokens, abaixo do proprietário do recurso, na caixa, insira uma justificativa para a solicitação.
+
+11. Em **Acesso ao repositório**, selecione quais repositórios você deseja que o token acesse. Você deve escolher o acesso mínimo ao repositório que atenda às suas necessidades. Os tokens sempre incluem acesso somente leitura a todos os repositórios públicos no GitHub.
+
+12. Se você selecionou **Selecionar somente repositórios** na etapa anterior, na lista suspensa **Repositórios selecionados** , selecione os repositórios que você deseja que o token acesse.
+
+13. Em **Permissões**, selecione quais permissões quer conceder o token. Dependendo do proprietário do recurso e do acesso do repositório especificados, haverá permissões de repositório, organização e conta. Você deve escolher as permissões mínimas para suas necessidades.
+
+    O documento de referência da API REST para cada ponto de extremidade especifica se o ponto de extremidade funciona com fine-grained personal access tokens e indica quais permissões são necessárias para que o token use o ponto de extremidade. Alguns pontos de extremidade podem exigir várias permissões e alguns pontos de extremidade podem exigir uma de várias permissões. Para obter uma visão geral dos pontos de extremidade da API REST que fine-grained personal access token pode acessar com cada permissão, consulte [Permissões necessárias para tokens de acesso pessoal refinados](/pt/rest/overview/permissions-required-for-fine-grained-personal-access-tokens).
+
+14. Clique em **Gerar token**.
+
+Se você selecionou uma organização como o proprietário do recurso e a organização requer aprovação para fine-grained personal access tokens, o token será marcado como `pending` até que seja revisado por um administrador da organização. O token poderá ler apenas recursos públicos até que seja aprovado. Se você for um proprietário da organização, a solicitação será aprovada automaticamente. Para saber mais, confira [Revisar e revogar tokens de acesso pessoal na organização](/pt/organizations/managing-programmatic-access-to-your-organization/reviewing-and-revoking-personal-access-tokens-in-your-organization).
+
+## Pré-preenchimento de fine-grained personal access token detalhes usando parâmetros de URL
+
+Você pode compartilhar modelos para um fine-grained personal access token por meio de links. Ao direcionar os usuários para a criação de tokens com campos relevantes já concluídos, você facilita a automatização de fluxos de trabalho e aprimoramento da experiência do desenvolvedor.
+
+Cada campo com suporte pode ser definido usando um parâmetro de consulta específico. Todos os parâmetros são opcionais e validados pelo formulário de geração de token para garantir que as combinações de permissões e proprietário do recurso façam sentido.
+
+Aqui está um modelo de URL de exemplo, com quebras de linha para legibilidade:
+
+```http copy
+https://github.com/settings/personal-access-tokens/new
+  ?name=Repo-reading+token
+  &description=Just+contents:read
+  &target_name=octodemo
+  &expires_in=45
+  &contents=read
+```
+
+Experimente a URL para criar um token com `contents:read` e `metadata:read`, com o nome e a descrição fornecidos e uma data de validade de 45 dias no futuro. Você verá uma mensagem de erro indicando `Cannot find the specified resource owner: octodemo` porque você não é membro da organização `octodemo`.
+
+Abaixo estão alguns exemplos de URLs que geram os tokens que vemos com mais frequência:
+
+* [Ler conteúdo do repositório](https://github.com/settings/personal-access-tokens/new?name=Repo-reading+token\&description=Just+contents:read\&contents=read)
+* [Acesso de push a repositórios](https://github.com/settings/personal-access-tokens/new?name=Repo-writing+token\&description=Just+contents:write\&contents=write)
+* [
+  GitHub Models acesso](https://github.com/settings/personal-access-tokens/new?name=GitHub+Models+token\&description=Used%20to%20call%20GitHub%20Models%20APIs%20to%20easily%20run%20LLMs%3A%20https%3A%2F%2Fdocs.github.com%2Fgithub-models%2Fquickstart%23step-2-make-an-api-call\&user_models=read)<!-- markdownlint-disable-line search-replace Custom rule -->
+* [Atualizar código e abrir uma solicitação de pull](https://github.com/settings/personal-access-tokens/new?name=Core-loop+token\&description=Write%20code%20and%20push%20it%20to%20main%21%20Includes%20permission%20to%20edit%20workflow%20files%20for%20Actions%20-%20remove%20%60workflows%3Awrite%60%20if%20you%20don%27t%20need%20to%20do%20that\&contents=write\&pull_requests=write\&workflows=write)
+* [Gerenciar Copilot licenças em uma organização](https://github.com/settings/personal-access-tokens/new?name=Core-loop+token\&description=Enable%20or%20disable%20copilot%20access%20for%20users%20with%20the%20Seat%20Management%20APIs%3A%20https%3A%2F%2Fdocs.github.com%2Frest%2Fcopilot%2Fcopilot-user-management%0ABe%20sure%20to%20select%20an%20organization%20for%20your%20resource%20owner%20below%21\&organization_copilot_seat_management=write)<!-- markdownlint-disable-line search-replace Custom rule -->
+* [Fazer Copilot solicitações](https://github.com/settings/personal-access-tokens/new?name=Copilot+requests+token\&description=Make%20Copilot%20API%20requests%20on%20behalf%20of%20the%20user%2C%20consuming%20premium%20requests%3A%20https%3A%2F%2Fdocs.github.com%2Fcopilot%2Fconcepts%2Fbilling%2Fcopilot-requests\&user_copilot_requests=read)<!-- markdownlint-disable-line search-replace Custom rule -->
+
+### Parâmetros de consulta compatíveis
+
+Para criar seu próprio modelo de token, siga os detalhes do parâmetro de consulta fornecidos nesta tabela:
+
+| Parâmetro      | Tipo                                   | Exemplo de valor                                                                                                                                                                      | Valores válidos                            | Description                                                                                                                                                             |
+| -------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`         | cadeia                                 | `Deploy%20Bot`                                                                                                                                                                        | ≤40 caracteres, codificados em URL         | Preenche previamente o nome de exibição do token.                                                                                                                       |
+| `description`  | cadeia                                 | `Used+for+deployments`                                                                                                                                                                | ≤1.024 caracteres, codificados em URL      | Preenche previamente a descrição do token.                                                                                                                              |
+| `target_name`  | cadeia                                 | `octodemo`                                                                                                                                                                            | Slug do usuário ou da organização          | Define o destino de recurso do token. Esse é o proprietário dos repositórios que o token poderá acessar. Se não for fornecido, o padrão será a conta do usuário atual.  |
+| `expires_in`   | inteiro                                |                                                                                                                                                                                       |                                            |                                                                                                                                                                         |
+| `30` ou `none` | Número inteiro entre 1 e 366 ou `none` | Dias até a expiração ou `none` para não haver expiração. Se não for fornecido, o padrão será de 30 dias, ou menos se o destino tiver uma política de tempo de vida de token definida. |                                            |                                                                                                                                                                         |
+| `<permission>` | cadeia                                 | `contents=read`                                                                                                                                                                       | Uma série de níveis de permissão e acesso. | As permissões que o token deve ter. As permissões podem ser definidas como `read`, `write` ou `admin`, mas nem todas as permissões dão suporte a cada um desses níveis. |
+
+### Permissões
+
+Para definir uma permissão, use seu nome como um parâmetro de consulta, com o valor especificando o nível de acesso desejado. Os níveis de acesso válidos são `read`, `write` e `admin`, mas nem todas as permissões aceitam todos os níveis — algumas aceitam somente `read`, outras aceitam somente `write`, e apenas algumas aceitam `admin`.
+
+Combine várias permissões no formulário `&contents=read&pull_requests=write&...`, usando quantas forem necessárias.
+
+> \[!TIP]
+> Você não precisa incluir tanto `read` quanto `write` para uma permissão em sua URL — `write` sempre inclui `read`e `admin` sempre inclui `write`.
+
+#### Permissões da conta
+
+> \[!IMPORTANT]
+> As permissões de conta só podem ser usadas quando o usuário atual é o proprietário do recurso.
+
+| Nome do parâmetro                | Nome de exibição                | Níveis de Acesso |
+| -------------------------------- | ------------------------------- | ---------------- |
+| `blocking`                       | Bloquear outro usuário          |                  |
+| `read`, `write`                  |                                 |                  |
+| `codespaces_user_secrets`        |                                 |                  |
+| Codespaces segredos do usuário   |                                 |                  |
+| `read`, `write`                  |                                 |                  |
+| `copilot_messages`               | Bate-papo do Copilot            | `read`           |
+| `copilot_editor_context`         |                                 |                  |
+| Copilot Contexto do Editor       | `read`                          |                  |
+| `copilot_requests`               |                                 |                  |
+| Copilot solicitações             | `write`                         |                  |
+| `emails`                         | Endereços de email              |                  |
+| `read`, `write`                  |                                 |                  |
+| `user_events`                    | Events                          | `read`           |
+| `followers`                      | Seguidores                      |                  |
+| `read`, `write`                  |                                 |                  |
+| `gpg_keys`                       | Chaves GPG                      |                  |
+| `read`, `write`                  |                                 |                  |
+| `gists`                          | Gists                           | `write`          |
+| `keys`                           | Chaves SSH do Git               |                  |
+| `read`, `write`                  |                                 |                  |
+| `interaction_limits`             | Limites de interação            |                  |
+| `read`, `write`                  |                                 |                  |
+| `knowledge_bases`                | Bases de dados de conhecimento  |                  |
+| `read`, `write`                  |                                 |                  |
+| `user_models`                    | Models                          | `read`           |
+| `plan`                           | Plano                           | `read`           |
+| `private_repository_invitations` | Convites de repositório privado | `read`           |
+| `profile`                        | Profile                         | `write`          |
+| `git_signing_ssh_public_keys`    | Chaves de assinatura SSH        |                  |
+| `read`, `write`                  |                                 |                  |
+| `starring`                       | Destacar                        |                  |
+| `read`, `write`                  |                                 |                  |
+| `watching`                       | Observando                      |                  |
+| `read`, `write`                  |                                 |                  |
+
+> \[!NOTE]
+> A `copilot_requests` permissão permite fazer Copilot solicitações para o usuário especificado. Essas solicitações contam para o subsídio de solicitação premium do usuário. Solicitações adicionais além da franquia geram cobrança de excedente. Para obter mais informações sobre Copilot solicitações e cobrança, consulte [Solicitações no GitHub Copilot (herdado)](/pt/copilot/concepts/billing/copilot-requests).
+
+#### Permissões de repositório
+
+As permissões de repositório funcionam para proprietários de recursos do usuário e da organização.
+
+| Nome do parâmetro                         | Nome de exibição                   | Níveis de Acesso |
+| ----------------------------------------- | ---------------------------------- | ---------------- |
+| `actions`                                 | Ações                              |                  |
+| `read`, `write`                           |                                    |                  |
+| `administration`                          | Administração                      |                  |
+| `read`, `write`                           |                                    |                  |
+|                                           |                                    |                  |
+| `artifact_metadata`                       | Metadados de artefato              |                  |
+| `read`, `write`                           |                                    |                  |
+|                                           |                                    |                  |
+| `attestations`                            | Attestations                       |                  |
+| `read`, `write`                           |                                    |                  |
+|                                           |                                    |                  |
+| `code_quality`                            | Qualidade do código                |                  |
+| `read`, `write`                           |                                    |                  |
+|                                           |                                    |                  |
+| `security_events`                         | Alertas de escaneamento de código  |                  |
+| `read`, `write`                           |                                    |                  |
+| `codespaces`                              | Codespaces                         |                  |
+| `read`, `write`                           |                                    |                  |
+| `codespaces_lifecycle_admin`              |                                    |                  |
+| Codespaces administrador de ciclo de vida |                                    |                  |
+| `read`, `write`                           |                                    |                  |
+| `codespaces_metadata`                     | Metadados do Codespaces            | `read`           |
+| `codespaces_secrets`                      |                                    |                  |
+| Codespaces Segredos                       | `write`                            |                  |
+| `statuses`                                | Status de commit                   |                  |
+| `read`, `write`                           |                                    |                  |
+| `contents`                                | Conteúdos                          |                  |
+| `read`, `write`                           |                                    |                  |
+| `repository_custom_properties`            | Propriedades personalizadas        |                  |
+| `read`, `write`                           |                                    |                  |
+| `vulnerability_alerts`                    | Dependabot alerts                  |                  |
+| `read`, `write`                           |                                    |                  |
+| `dependabot_secrets`                      | Segredos de Dependabot             |                  |
+| `read`, `write`                           |                                    |                  |
+| `deployments`                             | Implantações                       |                  |
+| `read`, `write`                           |                                    |                  |
+| `discussions`                             | Discussões                         |                  |
+| `read`, `write`                           |                                    |                  |
+| `environments`                            | Ambientes                          |                  |
+| `read`, `write`                           |                                    |                  |
+| `issues`                                  | Problemas                          |                  |
+| `read`, `write`                           |                                    |                  |
+| `merge_queues`                            | Filas de mesclagem                 |                  |
+| `read`, `write`                           |                                    |                  |
+| `metadata`                                | Metadata                           | `read`           |
+| `pages`                                   | Páginas                            |                  |
+| `read`, `write`                           |                                    |                  |
+| `pull_requests`                           | Solicitações de pull               |                  |
+| `read`, `write`                           |                                    |                  |
+| `repository_advisories`                   | Avisos de segurança do repositório |                  |
+| `read`, `write`                           |                                    |                  |
+| `secret_scanning_alerts`                  |                                    |                  |
+| Secret scanning Alertas                   |                                    |                  |
+| `read`, `write`                           |                                    |                  |
+| `secrets`                                 | Secrets                            |                  |
+| `read`, `write`                           |                                    |                  |
+| `actions_variables`                       | Variables                          |                  |
+| `read`, `write`                           |                                    |                  |
+| `repository_hooks`                        | Webhooks                           |                  |
+| `read`, `write`                           |                                    |                  |
+| `workflows`                               | Fluxos de trabalho                 | `write`          |
+
+#### Permissões da organização
+
+> \[!IMPORTANT]
+> As permissões da organização só poderão ser usadas se o proprietário do recurso for uma organização.
+
+| Nome do parâmetro                               | Nome de exibição                                               | Níveis de Acesso |
+| ----------------------------------------------- | -------------------------------------------------------------- | ---------------- |
+| `organization_api_insights`                     | Insights de API                                                | `read`           |
+| `organization_administration`                   | Administração                                                  |                  |
+| `read`, `write`                                 |                                                                |                  |
+| `organization_user_blocking`                    | Bloquear usuários                                              |                  |
+| `read`, `write`                                 |                                                                |                  |
+| `organization_campaigns`                        | Campaigns                                                      |                  |
+| `read`, `write`                                 |                                                                |                  |
+| `organization_custom_org_roles`                 | Funções de organização personalizadas                          |                  |
+| `read`, `write`                                 |                                                                |                  |
+| `organization_custom_properties`                | Propriedades do repositório personalizado                      |                  |
+| `read`, `write`, `admin`                        |                                                                |                  |
+| `organization_custom_roles`                     | Funções de repositório personalizadas                          |                  |
+| `read`, `write`                                 |                                                                |                  |
+| `organization_events`                           | Events                                                         | `read`           |
+| `organization_copilot_seat_management`          | GitHub Copilot Business                                        |                  |
+| `read`, `write`                                 |                                                                |                  |
+| `issue_types`                                   | Tipos de problemas                                             |                  |
+| `read`, `write`                                 |                                                                |                  |
+| `organization_knowledge_bases`                  | Bases de dados de conhecimento                                 |                  |
+| `read`, `write`                                 |                                                                |                  |
+| `members`                                       | Members                                                        |                  |
+| `read`, `write`                                 |                                                                |                  |
+| `organization_models`                           | Models                                                         | `read`           |
+| `organization_network_configurations`           | Configurações de rede                                          |                  |
+| `read`, `write`                                 |                                                                |                  |
+| `organization_announcement_banners`             | Faixas de anúncio de organização                               |                  |
+| `read`, `write`                                 |                                                                |                  |
+| `organization_codespaces`                       | Organização Codespaces                                         |                  |
+| `read`, `write`                                 |                                                                |                  |
+| `organization_codespaces_secrets`               | Segredos da organização Codespaces                             |                  |
+| `read`, `write`                                 |                                                                |                  |
+| `organization_codespaces_settings`              | Configurações da organização Codespaces                        |                  |
+| `read`, `write`                                 |                                                                |                  |
+| `organization_dependabot_secrets`               | Segredos da organização Dependabot                             |                  |
+| `read`, `write`                                 |                                                                |                  |
+| `organization_code_scanning_dismissal_requests` | Solicitações de desligamento da organização para code scanning |                  |
+| `read`, `write`                                 |                                                                |                  |
+| `organization_private_registries`               | Registros privados da organização                              |                  |
+| `read`, `write`                                 |                                                                |                  |
+| `organization_plan`                             | Plano                                                          | `read`           |
+| `organization_projects`                         | Projects                                                       |                  |
+| `read`, `write`, `admin`                        |                                                                |                  |
+| `organization_secrets`                          | Secrets                                                        |                  |
+| `read`, `write`                                 |                                                                |                  |
+| `organization_self_hosted_runners`              | Executores auto-hospedados                                     |                  |
+| `read`, `write`                                 |                                                                |                  |
+| `team_discussions`                              | Discussões em equipe                                           |                  |
+| `read`, `write`                                 |                                                                |                  |
+| `organization_actions_variables`                | Variables                                                      |                  |
+| `read`, `write`                                 |                                                                |                  |
+| `organization_hooks`                            | Webhooks                                                       |                  |
+| `read`, `write`                                 |                                                                |                  |
+
+## Criar um personal access token (classic)
+
+> \[!NOTE]
+> Os proprietários da organização podem restringir o acesso de personal access token (classic) à sua organização. Se você tentar usar um personal access token (classic) para acessar recursos em uma organização que desabilitou personal access token (classic) o acesso, sua solicitação falhará com uma resposta 403. Em vez disso, você deve usar um GitHub App, OAuth appou fine-grained personal access token.
+
+> \[!WARNING]
+> Você personal access token (classic) pode acessar todos os repositórios que você pode acessar.
+> GitHub recomenda que você use fine-grained personal access tokens em vez disso, que você pode restringir a repositórios específicos.
+> Fine-grained personal access tokentambém permite que você especifique permissões refinadas em vez de escopos amplos.
+
+1. [Verifique seu endereço de email](/pt/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-email-preferences/verifying-your-email-address), se ele ainda não foi verificado.
+
+2. No canto superior direito de qualquer página do GitHub, clique em sua imagem de perfil e, em seguida, clique em **<svg version="1.1" width="16" height="16" viewBox="0 0 16 16" class="octicon octicon-gear" aria-label="gear" role="img"><path d="M8 0a8.2 8.2 0 0 1 .701.031C9.444.095 9.99.645 10.16 1.29l.288 1.107c.018.066.079.158.212.224.231.114.454.243.668.386.123.082.233.09.299.071l1.103-.303c.644-.176 1.392.021 1.82.63.27.385.506.792.704 1.218.315.675.111 1.422-.364 1.891l-.814.806c-.049.048-.098.147-.088.294.016.257.016.515 0 .772-.01.147.038.246.088.294l.814.806c.475.469.679 1.216.364 1.891a7.977 7.977 0 0 1-.704 1.217c-.428.61-1.176.807-1.82.63l-1.102-.302c-.067-.019-.177-.011-.3.071a5.909 5.909 0 0 1-.668.386c-.133.066-.194.158-.211.224l-.29 1.106c-.168.646-.715 1.196-1.458 1.26a8.006 8.006 0 0 1-1.402 0c-.743-.064-1.289-.614-1.458-1.26l-.289-1.106c-.018-.066-.079-.158-.212-.224a5.738 5.738 0 0 1-.668-.386c-.123-.082-.233-.09-.299-.071l-1.103.303c-.644.176-1.392-.021-1.82-.63a8.12 8.12 0 0 1-.704-1.218c-.315-.675-.111-1.422.363-1.891l.815-.806c.05-.048.098-.147.088-.294a6.214 6.214 0 0 1 0-.772c.01-.147-.038-.246-.088-.294l-.815-.806C.635 6.045.431 5.298.746 4.623a7.92 7.92 0 0 1 .704-1.217c.428-.61 1.176-.807 1.82-.63l1.102.302c.067.019.177.011.3-.071.214-.143.437-.272.668-.386.133-.066.194-.158.211-.224l.29-1.106C6.009.645 6.556.095 7.299.03 7.53.01 7.764 0 8 0Zm-.571 1.525c-.036.003-.108.036-.137.146l-.289 1.105c-.147.561-.549.967-.998 1.189-.173.086-.34.183-.5.29-.417.278-.97.423-1.529.27l-1.103-.303c-.109-.03-.175.016-.195.045-.22.312-.412.644-.573.99-.014.031-.021.11.059.19l.815.806c.411.406.562.957.53 1.456a4.709 4.709 0 0 0 0 .582c.032.499-.119 1.05-.53 1.456l-.815.806c-.081.08-.073.159-.059.19.162.346.353.677.573.989.02.03.085.076.195.046l1.102-.303c.56-.153 1.113-.008 1.53.27.161.107.328.204.501.29.447.222.85.629.997 1.189l.289 1.105c.029.109.101.143.137.146a6.6 6.6 0 0 0 1.142 0c.036-.003.108-.036.137-.146l.289-1.105c.147-.561.549-.967.998-1.189.173-.086.34-.183.5-.29.417-.278.97-.423 1.529-.27l1.103.303c.109.029.175-.016.195-.045.22-.313.411-.644.573-.99.014-.031.021-.11-.059-.19l-.815-.806c-.411-.406-.562-.957-.53-1.456a4.709 4.709 0 0 0 0-.582c-.032-.499.119-1.05.53-1.456l.815-.806c.081-.08.073-.159.059-.19a6.464 6.464 0 0 0-.573-.989c-.02-.03-.085-.076-.195-.046l-1.102.303c-.56.153-1.113.008-1.53-.27a4.44 4.44 0 0 0-.501-.29c-.447-.222-.85-.629-.997-1.189l-.289-1.105c-.029-.11-.101-.143-.137-.146a6.6 6.6 0 0 0-1.142 0ZM11 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM9.5 8a1.5 1.5 0 1 0-3.001.001A1.5 1.5 0 0 0 9.5 8Z"></path></svg> Configurações**.
+
+3. Na barra lateral esquerda, clique em **<svg version="1.1" width="16" height="16" viewBox="0 0 16 16" class="octicon octicon-code" aria-label="code" role="img"><path d="m11.28 3.22 4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734L13.94 8l-3.72-3.72a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215Zm-6.56 0a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042L2.06 8l3.72 3.72a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L.47 8.53a.75.75 0 0 1 0-1.06Z"></path></svg> Developer settings**.
+
+4. Na barra lateral esquerda, em **<svg version="1.1" width="16" height="16" viewBox="0 0 16 16" class="octicon octicon-key" aria-label="key" role="img"><path d="M10.5 0a5.499 5.499 0 1 1-1.288 10.848l-.932.932a.749.749 0 0 1-.53.22H7v.75a.749.749 0 0 1-.22.53l-.5.5a.749.749 0 0 1-.53.22H5v.75a.749.749 0 0 1-.22.53l-.5.5a.749.749 0 0 1-.53.22h-2A1.75 1.75 0 0 1 0 14.25v-2c0-.199.079-.389.22-.53l4.932-4.932A5.5 5.5 0 0 1 10.5 0Zm-4 5.5c-.001.431.069.86.205 1.269a.75.75 0 0 1-.181.768L1.5 12.56v1.69c0 .138.112.25.25.25h1.69l.06-.06v-1.19a.75.75 0 0 1 .75-.75h1.19l.06-.06v-1.19a.75.75 0 0 1 .75-.75h1.19l1.023-1.025a.75.75 0 0 1 .768-.18A4 4 0 1 0 6.5 5.5ZM11 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Personal access tokens**, clique em **Tokens (clássico)**.
+
+5. Selecione **Gerar novo token** e clique em **Gerar novo token (clássico).**
+
+6. No campo "Observação", dê um nome descritivo ao token.
+
+7. Para dar uma validade ao token, selecione **Validade** e escolha uma opção padrão ou clique em **Personalizado** para inserir uma data.
+
+8. Selecione os escopos ou as permissões que deseja conceder a esse token. Para usar o token para acessar os repositórios na linha de comando, selecione **repositório**. Um token com nenhum escopo atribuído só pode acessar informações públicas. Para saber mais, confira [Escopos para aplicativos OAuth](/pt/apps/oauth-apps/building-oauth-apps/scopes-for-oauth-apps#available-scopes).
+
+9. Clique em **Gerar token**.
+
+10. Opcionalmente, para copiar o novo token para sua área de transferência, clique em <svg version="1.1" width="16" height="16" viewBox="0 0 16 16" class="octicon octicon-copy" aria-label="Copy token" role="img"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path></svg>.
+
+![Captura de tela da página "Personal access tokens". Ao lado de um token desfocado, um ícone de dois quadrados sobrepostos está realçado em laranja.](/assets/images/help/settings/personal-access-tokens.png)
+
+1. Se quiser usar o token para acessar recursos pertencentes a uma organização que usa o logon único de SAML, autorize o token. Para obter mais informações, consulte [Como autorizar um token de acesso pessoal para uso com logon único](/pt/enterprise-cloud@latest/authentication/authenticating-with-saml-single-sign-on/authorizing-a-personal-access-token-for-use-with-saml-single-sign-on) na GitHub Enterprise Cloud documentação.
+
+## Excluindo um personal access token
+
+Você deve excluir um personal access token se ele não for mais necessário. Se você excluir um personal access token que foi usado para criar uma chave de implantação, a chave de implantação também será excluída.
+
+1. No canto superior direito de qualquer página do GitHub, clique em sua imagem de perfil e, em seguida, clique em **<svg version="1.1" width="16" height="16" viewBox="0 0 16 16" class="octicon octicon-gear" aria-label="gear" role="img"><path d="M8 0a8.2 8.2 0 0 1 .701.031C9.444.095 9.99.645 10.16 1.29l.288 1.107c.018.066.079.158.212.224.231.114.454.243.668.386.123.082.233.09.299.071l1.103-.303c.644-.176 1.392.021 1.82.63.27.385.506.792.704 1.218.315.675.111 1.422-.364 1.891l-.814.806c-.049.048-.098.147-.088.294.016.257.016.515 0 .772-.01.147.038.246.088.294l.814.806c.475.469.679 1.216.364 1.891a7.977 7.977 0 0 1-.704 1.217c-.428.61-1.176.807-1.82.63l-1.102-.302c-.067-.019-.177-.011-.3.071a5.909 5.909 0 0 1-.668.386c-.133.066-.194.158-.211.224l-.29 1.106c-.168.646-.715 1.196-1.458 1.26a8.006 8.006 0 0 1-1.402 0c-.743-.064-1.289-.614-1.458-1.26l-.289-1.106c-.018-.066-.079-.158-.212-.224a5.738 5.738 0 0 1-.668-.386c-.123-.082-.233-.09-.299-.071l-1.103.303c-.644.176-1.392-.021-1.82-.63a8.12 8.12 0 0 1-.704-1.218c-.315-.675-.111-1.422.363-1.891l.815-.806c.05-.048.098-.147.088-.294a6.214 6.214 0 0 1 0-.772c.01-.147-.038-.246-.088-.294l-.815-.806C.635 6.045.431 5.298.746 4.623a7.92 7.92 0 0 1 .704-1.217c.428-.61 1.176-.807 1.82-.63l1.102.302c.067.019.177.011.3-.071.214-.143.437-.272.668-.386.133-.066.194-.158.211-.224l.29-1.106C6.009.645 6.556.095 7.299.03 7.53.01 7.764 0 8 0Zm-.571 1.525c-.036.003-.108.036-.137.146l-.289 1.105c-.147.561-.549.967-.998 1.189-.173.086-.34.183-.5.29-.417.278-.97.423-1.529.27l-1.103-.303c-.109-.03-.175.016-.195.045-.22.312-.412.644-.573.99-.014.031-.021.11.059.19l.815.806c.411.406.562.957.53 1.456a4.709 4.709 0 0 0 0 .582c.032.499-.119 1.05-.53 1.456l-.815.806c-.081.08-.073.159-.059.19.162.346.353.677.573.989.02.03.085.076.195.046l1.102-.303c.56-.153 1.113-.008 1.53.27.161.107.328.204.501.29.447.222.85.629.997 1.189l.289 1.105c.029.109.101.143.137.146a6.6 6.6 0 0 0 1.142 0c.036-.003.108-.036.137-.146l.289-1.105c.147-.561.549-.967.998-1.189.173-.086.34-.183.5-.29.417-.278.97-.423 1.529-.27l1.103.303c.109.029.175-.016.195-.045.22-.313.411-.644.573-.99.014-.031.021-.11-.059-.19l-.815-.806c-.411-.406-.562-.957-.53-1.456a4.709 4.709 0 0 0 0-.582c-.032-.499.119-1.05.53-1.456l.815-.806c.081-.08.073-.159.059-.19a6.464 6.464 0 0 0-.573-.989c-.02-.03-.085-.076-.195-.046l-1.102.303c-.56.153-1.113.008-1.53-.27a4.44 4.44 0 0 0-.501-.29c-.447-.222-.85-.629-.997-1.189l-.289-1.105c-.029-.11-.101-.143-.137-.146a6.6 6.6 0 0 0-1.142 0ZM11 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM9.5 8a1.5 1.5 0 1 0-3.001.001A1.5 1.5 0 0 0 9.5 8Z"></path></svg> Configurações**.
+2. Na barra lateral esquerda, clique em **<svg version="1.1" width="16" height="16" viewBox="0 0 16 16" class="octicon octicon-code" aria-label="code" role="img"><path d="m11.28 3.22 4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734L13.94 8l-3.72-3.72a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215Zm-6.56 0a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042L2.06 8l3.72 3.72a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L.47 8.53a.75.75 0 0 1 0-1.06Z"></path></svg> Developer settings**.
+3. Na barra lateral esquerda, em **<svg version="1.1" width="16" height="16" viewBox="0 0 16 16" class="octicon octicon-key" aria-label="key" role="img"><path d="M10.5 0a5.499 5.499 0 1 1-1.288 10.848l-.932.932a.749.749 0 0 1-.53.22H7v.75a.749.749 0 0 1-.22.53l-.5.5a.749.749 0 0 1-.53.22H5v.75a.749.749 0 0 1-.22.53l-.5.5a.749.749 0 0 1-.53.22h-2A1.75 1.75 0 0 1 0 14.25v-2c0-.199.079-.389.22-.53l4.932-4.932A5.5 5.5 0 0 1 10.5 0Zm-4 5.5c-.001.431.069.86.205 1.269a.75.75 0 0 1-.181.768L1.5 12.56v1.69c0 .138.112.25.25.25h1.69l.06-.06v-1.19a.75.75 0 0 1 .75-.75h1.19l.06-.06v-1.19a.75.75 0 0 1 .75-.75h1.19l1.023-1.025a.75.75 0 0 1 .768-.18A4 4 0 1 0 6.5 5.5ZM11 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Personal access tokens**, clique em **Tokens detalhados** ou **Tokens (Clássicos)**, dependendo do tipo que você gostaria de excluir personal access token.
+4. À direita de personal access token que você deseja excluir, clique em **Excluir**.
+
+>
+
+\[!NOTE] Se você encontrar um vazamento personal access token pertencente a outra pessoa, poderá enviar uma solicitação de revogação por meio da API REST. Confira [Melhores práticas para evitar vazamentos de dados na sua organização](/pt/code-security/getting-started/best-practices-for-preventing-data-leaks-in-your-organization#mitigate-data-leaks).
+
+## Usando um personal access token na linha de comando
+
+Depois de ter uma personal access token, você pode inseri-la em vez de sua senha ao executar operações do Git por HTTPS.
+
+Por exemplo, para clonar um repositório na linha de comando, insira o comando `git clone` a seguir. Você será solicitado a inserir seu nome de usuário e senha. Quando solicitado, insira o seu personal access token em vez de uma senha.
+
+```shell
+$ git clone https://github.com/USERNAME/REPO.git
+Username: YOUR-USERNAME
+Password: YOUR-PERSONAL-ACCESS-TOKEN
+```
+
+Embora seja necessário inserir seu nome de usuário junto com personal access token, o nome de usuário não é usado para autenticar você. Em vez disso, o personal access token é usado para autenticar você. Se você não inserir um nome de usuário, receberá uma mensagem de erro informando que suas credenciais são inválidas.
+
+Personal access tokens só podem ser usados para operações HTTPS Git. Se o repositório usar uma URL remota SSH, você precisará [alternar o repositório remoto de SSH para HTTPS](/pt/get-started/git-basics/managing-remote-repositories#switching-remote-urls-from-ssh-to-https).
+
+Se não for solicitado a informar seu nome de usuário e a senha, suas credenciais poderão ser armazenadas em cache no seu computador. Você pode [atualizar suas credenciais no conjunto de chaves](/pt/get-started/git-basics/updating-credentials-from-the-macos-keychain) para substituir sua senha antiga pelo token.
+
+Em vez de inserir manualmente seu personal access token para cada operação HTTPS Git, você pode armazenar em cache seu personal access token usando um cliente Git. O Git irá armazenar temporariamente as suas credenciais na memória até que um intervalo de expiração tenha passado. Você também pode armazenar o token em um arquivo de texto simples que o Git pode ler antes de cada solicitação. Para saber mais, confira [Armazenando suas credenciais de GitHub em cache no Git](/pt/get-started/git-basics/caching-your-github-credentials-in-git).
+
+## Leitura adicional
+
+* [Sobre a autenticação para GitHub](/pt/authentication/keeping-your-account-and-data-secure/about-authentication-to-github)
+* [Vencimento e revogação de token](/pt/authentication/keeping-your-account-and-data-secure/token-expiration-and-revocation)
